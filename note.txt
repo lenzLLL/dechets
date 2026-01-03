@@ -1,0 +1,90 @@
+pip install pipenv
+pipenv install django
+pipenv shell
+django-admin startproject app_name .
+python manage.py runserver
+pip install djangorestframwork
+python manage.py startapp playground
+add plauground in setting of app_name
+create launch.json pour executer plus facilement
+python -m pip install django-debug-toolbar
+add 'debug_toolbar' as app on settting ensuite aller dans la doc
+ python manage.py makemigrations thne python manage.py migrate
+    class Meta:
+        db_table = "store_customers"
+        indexes = [
+            models.Index(fields=['last_name','first_name'])
+        ]
+Supprimez une migration python manage.py migrate shop 0002 ensuite supprimez le 0003
+ensuite appliquer la migration
+configurer sa propre base de données après avoir installer postgres ql
+python manage.py makemigrations shop --empty ensuite parametrez ça
+pip install pillow for image field
+python manage.py createsuperuser
+import signal in apps.py
+add stripe 
+pip install python-dotenv
+pip3 install stripe
+ngrok pour le webhook
+ngrok authtoken 31KLKuVnyn2I5Zc4exrqaEoxU3X_2sPzcCU5SZCdSVD5kk2SB
+ngrok http 8000
+allow host *
+railway for postgres ql
+pip install psycopg2-binary
+pip install gunicorn
+pip freeze > requirements.txt
+bash git
+git init
+gi add .
+git commit -m 'first commit'
+git push origin main
+pip install drf-spectacular pour la doc
+add "drf_spectacular"  to installed app
+REST_FRAMEWORK = { 
+    'DEFAULT_SCHEMA_CLASS' : 'drf_spectacular.openapi.AutoSchema' , 
+}
+python manage.py spectacular --color --file schema.yml --validate
+New-Item -Path Dockerfile -ItemType File
+notepad Dockerfile
+python manage.py shell
+from django.contrib.auth import get_user_model
+User = get_user_model()
+user = User.objects.get(email='admin@example.com')
+user.is_active = True
+user.save()
+then to personnalize User python manage.py startapp user
+register on the swagger
+pip install python-dotenv psycopg2
+pip install psycopg2-binary
+python manage.py flush to destroy all data in db
+pip freeze > requirements.txt
+pip install -r requirements.txt
+drop schema public cascade;
+create schema public;
+
+   'rest_framework_simplejwt.token_blacklist', ensuite faire la migration pour le logout
+
+Docker 
+	
+pip freeze > requirements.txt
+docker init
+Étape 1 : Construire l’image Docker
+
+À la racine de ton projet Django (là où se trouve ton Dockerfile), lance :
+
+docker build -t safemove-api .
+
+docker composer pour la production
+
+création d'un docker-compose.yml
+h:\coding\django\photizon\note.txt
+
+rendre le dashboard plus beau 
+pip install django-admin-interface
+pip install django-colorfield
+et ajouter dans le dashbaord 
+    'admin_interface',
+    'colorfield',
+    'django.contrib.admin',
+
+et enfin python manage.py collectstatic
