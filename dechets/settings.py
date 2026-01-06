@@ -10,7 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +46,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'admin_interface',
     'colorfield',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -54,11 +60,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-ROOT_URLCONF = 'dechets.urls'
-REST_FRAMEWORK = { 
-    'DEFAULT_SCHEMA_CLASS' : 'drf_spectacular.openapi.AutoSchema' , 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    )
 }
+ROOT_URLCONF = 'dechets.urls'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -75,7 +83,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'dechets.wsgi.application'
-
+AUTH_USER_MODEL = "api.User"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -118,8 +126,26 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+META_PHONE_ID = os.getenv("META_PHONE_ID")
+META_WHATSAPP_API_KEY = os.getenv("META_WHATSAPP_API_KEY")
+OTP_EXPIRATION_SECONDS = int(os.getenv("OTP_EXPIRATION_SECONDS", 300))
+OTP_SEND_COOLDOWN_SECONDS = int(os.getenv("OTP_SEND_COOLDOWN_SECONDS", 60))
+META_WA_TOKEN=os.getenv("META_WA_TOKEN")
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+      "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+    'DEFAULT_SCHEMA_CLASS' : 'drf_spectacular.openapi.AutoSchema' , 
+    
+}
 STATIC_URL = 'static/'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

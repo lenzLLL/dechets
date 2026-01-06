@@ -30,16 +30,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = [
         ("SADMIN", "Admin"),
         ("USER", "Client"),
+        ("ADMIN", "Admin"),
         ("BOUNCER", "Videur"),
     ]
 
     phone_number = models.CharField(max_length=50, unique=True, db_index=True)
     name = models.CharField(max_length=100, blank=True)
     picture_url = models.URLField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
-    latitude = models.FloatField(blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True)
-    city = models.CharField(max_length=100, blank=True)
     zipcode = models.CharField(max_length=20, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="USER", db_index=True)
 
@@ -151,7 +148,10 @@ class Subscription(models.Model):
     expires_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     collection_frequency = models.IntegerField(default=1)  # collectes par semaine
-
+    longitude = models.FloatField(default=0)
+    latitude = models.FloatField(default=0)
+    address = models.CharField(max_length=255,default="")
+    city = models.CharField(max_length=255,default="")
     # Paiement
     gateway = models.CharField(max_length=50, blank=True, null=True)
     gateway_subscription_id = models.CharField(max_length=200, blank=True, null=True)
@@ -223,9 +223,12 @@ class Payment(models.Model):
     )
     subscription = models.ForeignKey(
         'Subscription',
-        on_delete=models.CASCADE,
+       on_delete=models.SET_NULL, null=True,
         related_name="payments"  # ⚠️ unique pour éviter les conflits
     )
+
+    # Snapshot of the plan at time of payment (useful in history)
+    plan = models.CharField(max_length=30, choices=Subscription.PLAN_CHOICES, default="FREE")
 
     # Infos paiement
     amount = models.DecimalField(max_digits=10, decimal_places=2)
