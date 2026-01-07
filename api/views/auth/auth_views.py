@@ -78,8 +78,11 @@ def verify_otp_view(request):
     otp_obj.delete()
 
     # 5. Retour
+    message = "Nouveau compte créé" if created else "Utilisateur existant connecté"
+
     return Response({
         "success": True,
+        "message": message,
         "is_new_user": created,
         "user": UserSerializer(user).data,
         "access": str(refresh.access_token),

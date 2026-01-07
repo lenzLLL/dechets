@@ -26,7 +26,7 @@ def send_otp_whatsapp(phone):
     # Requête API Meta WhatsApp
     url = f"https://graph.facebook.com/v22.0/863349426864550/messages"
     headers = {
-        "Authorization": f"Bearer EAAMNQbohC3wBQVH7gZCBpSQhK42ldxLr2P6PB5KPG9QLC2KkYHFUs9ftNbBsz3R2nWaLv4yMc82LZADc2LxTH3ZCKZARPd3FreF2ZABXC8xgoqIMTtKdzygZAEmrG9cUPZBs7ZAEFKurOxn2qQbsoiP41jUNFn0lZB5f6AeFLhNeFWSUZCkqKyby4Mg73pYjhDwMPfbgHiCOrTySSjDHwLQ8KE7WDVwK5LL0rLB831YlfqMT3UUzjgYxqjaOPJLGBXCWQ26gSn0KQhwVZAxTbjh8IhZBVoV7XgZDZD",
+        "Authorization": f"Bearer EAAMNQbohC3wBQbrQNeqkMDEP08ZCsai7I8pv8SoMWw8FxqnDEns1zdGJKgyf0pPdQXGgFFqbkn8LuigPa79QS5XYoIZB2foWTsW7GTAtPZBsDqbgnuJf86pwJuiWy0tFzxYqgSWtSGzjV4my71N5LmJUq8ClfRymDIEqY8qMn4k0JVduJzlhgSSf4f7986gSejcNYgNkaXynkLg6a6R3Ea1hJsPpZCmWbUDW6mMvQ6m74MMbtDJlZBnENJc3vSfOmohHZA8pMxvgKKXmVDcyZAQgtfA",
         "Content-Type": "application/json"
     }
 
@@ -74,7 +74,7 @@ def send_whatsapp_template(to_phone: str, template_name: str, parameters: list, 
 
     url = f"https://graph.facebook.com/v22.0/863349426864550/messages"
     headers = {
-        "Authorization": f"Bearer EAAMNQbohC3wBQVH7gZCBpSQhK42ldxLr2P6PB5KPG9QLC2KkYHFUs9ftNbBsz3R2nWaLv4yMc82LZADc2LxTH3ZCKZARPd3FreF2ZABXC8xgoqIMTtKdzygZAEmrG9cUPZBs7ZAEFKurOxn2qQbsoiP41jUNFn0lZB5f6AeFLhNeFWSUZCkqKyby4Mg73pYjhDwMPfbgHiCOrTySSjDHwLQ8KE7WDVwK5LL0rLB831YlfqMT3UUzjgYxqjaOPJLGBXCWQ26gSn0KQhwVZAxTbjh8IhZBVoV7XgZDZD",
+        "Authorization": f"Bearer EAAMNQbohC3wBQbrQNeqkMDEP08ZCsai7I8pv8SoMWw8FxqnDEns1zdGJKgyf0pPdQXGgFFqbkn8LuigPa79QS5XYoIZB2foWTsW7GTAtPZBsDqbgnuJf86pwJuiWy0tFzxYqgSWtSGzjV4my71N5LmJUq8ClfRymDIEqY8qMn4k0JVduJzlhgSSf4f7986gSejcNYgNkaXynkLg6a6R3Ea1hJsPpZCmWbUDW6mMvQ6m74MMbtDJlZBnENJc3vSfOmohHZA8pMxvgKKXmVDcyZAQgtfA",
         "Content-Type": "application/json"
     }
 
