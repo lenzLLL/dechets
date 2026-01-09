@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from api.models import Subscription, User, Payment, Schedule
+from api.models import Subscription, User, Payment, Schedule, Collecte
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "phone_number", "name", "role", "picture_url", "created_at","updated_at"]
+        fields = ["id", "phone_number", "name", "role", "picture_url", "address", "city", "country", "created_at","updated_at"]
 
 class UserMeSerializer(serializers.ModelSerializer):
     is_sadmin = serializers.SerializerMethodField()
@@ -17,6 +17,9 @@ class UserMeSerializer(serializers.ModelSerializer):
             "picture_url",
             "role",
             "is_sadmin",
+            "address",
+            "city",
+            "country",
             "created_at",
             "updated_at",
         ]
@@ -129,3 +132,20 @@ class ScheduleSerializer(serializers.ModelSerializer):
                 })
 
         return attrs
+
+
+class CollecteSerializer(serializers.ModelSerializer):
+    client = UserMeSerializer(read_only=True)
+    videur = UserMeSerializer(read_only=True)
+    subscription = SubscriptionSerializer(read_only=True)
+    subscription_id = serializers.PrimaryKeyRelatedField(
+        queryset=Subscription.objects.all(),
+        write_only=True,
+        source='subscription'
+    )
+    date = serializers.DateTimeField(required=False)
+
+    class Meta:
+        model = Collecte
+        fields = ["id", "client", "videur", "subscription", "subscription_id", "date", "status", "waste_type", "weight_kg", "created_at"]
+        read_only_fields = ["created_at"]

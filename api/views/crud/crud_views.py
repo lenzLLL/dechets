@@ -5,12 +5,13 @@ from django.utils import timezone
 from rest_framework import status
 from django.db.models import Count
 from django.db.models import Q
+from django.db.models import Sum
 from api.permissions import IsAuthenticatedUser
-from api.serializers import UserMeSerializer, UserSerializer
+from api.serializers import UserMeSerializer, UserSerializer, PaymentSerializer, SubscriptionSerializer
 from api.services.notify import create_and_send_whatsapp_notification
 from django.utils.text import slugify
 from django.db import transaction
-from api.models import Schedule, Subscription, User
+from api.models import Payment, Schedule, Subscription, User
 from api.serializers import ScheduleSerializer
 
 from datetime import datetime
@@ -327,3 +328,133 @@ def delete_schedule(request):
 
     schedule.delete()
     return Response({"detail": "Schedule deleted"})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedUser])
+def list_users(request):
+    """List users with optional filters: ?role=&city=&address=&subscription=PLAN
+    Results ordered descending by id.
+    """
+    qs = User.objects.all()
+    role = request.GET.get('role')
+    city = request.GET.get('city')
+    address = request.GET.get('address')
+    subscription_plan = request.GET.get('subscription')
+
+    if role:
+        qs = qs.filter(role__iexact=role)
+    if city:
+        qs = qs.filter(city__icontains=city)
+    if address:
+        qs = qs.filter(address__icontains=address)
+    if subscription_plan:
+        qs = qs.filter(subscription__plan__iexact=subscription_plan)
+
+    qs = qs.order_by('-id')
+    serializer = UserSerializer(qs, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedUser])
+def list_payments(request):
+    """List payments with filters: ?client=&subscription=&status=&plan=. Ordered desc by created_at."""
+    qs = Payment.objects.select_related('client', 'subscription').all()
+    client_id = request.GET.get('client')
+    sub_id = request.GET.get('subscription')
+    status_val = request.GET.get('status')
+    plan = request.GET.get('plan')
+
+    if client_id:
+        qs = qs.filter(client__id=client_id)
+    if sub_id:
+        qs = qs.filter(subscription__id=sub_id)
+    if status_val:
+        qs = qs.filter(status__iexact=status_val)
+    if plan:
+        qs = qs.filter(plan__iexact=plan)
+
+    qs = qs.order_by('-created_at')
+    serializer = PaymentSerializer(qs, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedUser])
+def list_subscriptions(request):
+    """List subscriptions with optional filters: ?client=&plan=&city=. Ordered desc by started_at."""
+    qs = Subscription.objects.select_related('client').all()
+    client_id = request.GET.get('client')
+    plan = request.GET.get('plan')
+    city = request.GET.get('city')
+
+    if client_id:
+        qs = qs.filter(client__id=client_id)
+    if plan:
+        qs = qs.filter(plan__iexact=plan)
+    if city:
+        qs = qs.filter(city__icontains=city)
+
+    qs = qs.order_by('-started_at')
+    serializer = SubscriptionSerializer(qs, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedUser])
+def stats_revenues(request):
+    """Return revenue totals: daily, monthly, yearly, total (only successful payments).
+    Restricted to ADMIN/SADMIN.
+    """
+    user = request.user
+    if user.role not in ("SADMIN", "ADMIN"):
+        return Response({"detail": "Forbidden"}, status=403)
+
+    now = timezone.now()
+    # daily: paid_at date == today
+    daily_qs = Payment.objects.filter(status='success', paid_at__date=now.date())
+    monthly_qs = Payment.objects.filter(status='success', paid_at__year=now.year, paid_at__month=now.month)
+    yearly_qs = Payment.objects.filter(status='success', paid_at__year=now.year)
+    total_qs = Payment.objects.filter(status='success')
+
+    daily_total = daily_qs.aggregate(total=Sum('amount'))['total'] or 0
+    monthly_total = monthly_qs.aggregate(total=Sum('amount'))['total'] or 0
+    yearly_total = yearly_qs.aggregate(total=Sum('amount'))['total'] or 0
+    total_all = total_qs.aggregate(total=Sum('amount'))['total'] or 0
+
+    return Response({
+        'daily': str(daily_total),
+        'monthly': str(monthly_total),
+        'yearly': str(yearly_total),
+        'total': str(total_all),
+        'currency': getattr(Payment.objects.first(), 'currency', 'XAF')
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedUser])
+def stats_subscriptions(request):
+    """Return subscription counts: daily, monthly, yearly, total.
+    Restricted to ADMIN/SADMIN.
+    """
+    user = request.user
+    if user.role in ("SADMIN", "ADMIN"):
+        return Response({"detail": "Forbidden"}, status=403)
+
+    now = timezone.now()
+    daily_count = Subscription.objects.filter(started_at__date=now.date()).count()
+    monthly_count = Subscription.objects.filter(started_at__year=now.year, started_at__month=now.month).count()
+    yearly_count = Subscription.objects.filter(started_at__year=now.year).count()
+    total_count = Subscription.objects.all().count()
+
+    # also provide breakdown by plan
+    by_plan = Subscription.objects.values('plan').annotate(count=Count('id')).order_by('-count')
+
+    return Response({
+        'daily': daily_count,
+        'monthly': monthly_count,
+        'yearly': yearly_count,
+        'total': total_count,
+        'by_plan': list(by_plan)
+    })

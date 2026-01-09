@@ -38,6 +38,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=100, blank=True)
     picture_url = models.URLField(blank=True, null=True)
     zipcode = models.CharField(max_length=20, blank=True)
+    address = models.CharField(max_length=255, blank=True, default="")
+    city = models.CharField(max_length=255, blank=True, default="")
+    country = models.CharField(max_length=100, blank=True, default="")
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="USER", db_index=True)
 
     is_active = models.BooleanField(default=True)
@@ -197,10 +200,12 @@ class Collecte(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role':'USER'},related_name="collectes_client")
     videur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'role':'BOUNCER'},related_name="collectes_videur")
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
-    date = models.DateTimeField()
+    date = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
     waste_type = models.CharField(max_length=50, choices=WASTE_CHOICES, default='mixed')
     weight_kg = models.FloatField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)
+
 
     def __str__(self):
         return f"{self.client.phone_number} - {self.date.date()} - {self.status}"
